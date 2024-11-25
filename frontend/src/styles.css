@@ -1,0 +1,42 @@
+.login-page, .register-page {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.text-primary, .text-success {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.text-primary:hover, .text-success:hover {
+    text-decoration: underline;
+}
+.facturas-page {
+    background-color: #f8f9fa;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #e9ecef;
+}
+
+.dashboard-page {
+    background-color: #f1f1f1;
+}
+
+.clientes-proveedores-page {
+    background-color: #ffffff;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+h2 {
+    color: #333;
+    font-weight: bold;
+}

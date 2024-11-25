@@ -15,13 +15,30 @@ const Facturas = () => {
     }, []);
 
     return (
-        <div>
-            <h2>Listado de Facturas</h2>
-            <ul>
-                {facturas.map((factura) => (
-                    <li key={factura.id}>{factura.numero_factura} - {factura.monto_total}</li>
-                ))}
-            </ul>
+        <div className="facturas-page container py-5">
+            <h2 className="text-center mb-4">Listado de Facturas</h2>
+            <table className="table table-striped">
+                <thead className="thead-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Número de Factura</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Fecha de Vencimiento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {facturas.map((factura, index) => (
+                        <tr key={factura.id}>
+                            <td>{index + 1}</td>
+                            <td>{factura.numero_factura}</td>
+                            <td>${factura.monto_total.toFixed(2)}</td>
+                            <td>{factura.estado}</td>
+                            <td>{factura.fecha_vencimiento}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };
