@@ -19,7 +19,7 @@ const Dashboard = () => {
                 const { flujo_caja, estado_facturas } = response.data;
 
                 // Preparar datos para el gráfico de barras
-                const barLabels = flujo_caja.map(item => `Mes ${item.fecha_emision__month}`);
+                const barLabels = flujo_caja.map(item => item.nombre_mes); // Usamos el nombre del mes
                 const totalPorCobrar = flujo_caja.map(item => item.total_por_cobrar || 0);
                 const totalPorPagar = flujo_caja.map(item => item.total_por_pagar || 0);
 
