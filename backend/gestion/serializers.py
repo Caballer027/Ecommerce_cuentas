@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from .models import *
 
 class UserSerializer(serializers.ModelSerializer):
@@ -136,3 +137,40 @@ class FacturaProveedorCreateUpdateSerializer(serializers.ModelSerializer):
             'monto_total',
             'estado',
         ]
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(write_only=True, style={'input_type': 'password'})
+    role = serializers.ChoiceField(choices=User.ROLES, required=False)  # Opcional durante el registro
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'password2', 'role']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def validate(self, data):
+        # Validar que las contraseñas coincidan
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError({"password2": "Las contraseñas no coinciden."})
+        return data
+
+    def create(self, validated_data):
+        # Eliminar el campo `password2` antes de guardar
+        validated_data.pop('password2')
+        role = validated_data.pop('role', None)  # Extraer el rol (si se proporciona)
+
+        # Crear el usuario
+        user = User.objects.create_user(**validated_data)
+
+        # Asignar el rol si se especifica
+        if role:
+            user.role = role
+            user.save()
+
+        return user
+    
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise ValidationError("El nombre de usuario ya está registrado. Por favor, elige otro.")
+        return value

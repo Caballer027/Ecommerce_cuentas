@@ -92,7 +92,7 @@ class LoginView(TokenObtainPairView):
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -101,7 +101,11 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         return Response({
             "message": "Usuario creado exitosamente",
-            "user": UserSerializer(user).data
+            "user": {
+                "username": user.username,
+                "email": user.email,
+                "role": user.role,
+            }
         }, status=status.HTTP_201_CREATED)
     
 class AdminView(APIView):
@@ -234,8 +238,15 @@ class ImportarFacturasCSVView(APIView):
                 csv_file = csv.reader(file.read().decode('utf-8').splitlines())
                 next(csv_file)  # Saltar la fila de encabezados
 
+                facturas_omitidas = []  # Para registrar facturas duplicadas
+
                 for row in csv_file:
                     numero_factura, cliente_nombre, fecha_emision, fecha_vencimiento, monto_total, estado = row
+
+                    # Verificar si el número de factura ya existe
+                    if Factura.objects.filter(numero_factura=numero_factura).exists():
+                        facturas_omitidas.append(numero_factura)
+                        continue  # Ignorar facturas duplicadas
 
                     # Crear cliente si no existe
                     cliente, _ = Cliente.objects.get_or_create(nombre=cliente_nombre)
@@ -250,7 +261,13 @@ class ImportarFacturasCSVView(APIView):
                         estado=estado,
                     )
 
-            return Response({'message': 'Facturas importadas correctamente.'}, status=201)
+            if facturas_omitidas:
+                return Response({
+                    'message': 'Facturas importadas con éxito.',
+                    'facturas_omitidas': facturas_omitidas,
+                }, status=201)
+            else:
+                return Response({'message': 'Todas las facturas fueron importadas correctamente.'}, status=201)
 
         except Exception as e:
             return Response({'error': str(e)}, status=400)

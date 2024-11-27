@@ -13,6 +13,7 @@ urlpatterns = [
     path('', include(router.urls)),  # Incluye ViewSets sin prefijo adicional
     path('dashboard-data/', DashboardDataView.as_view(), name='dashboard-data'),
     path('login/', LoginView.as_view(), name='token_obtain_pair'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', RegisterView.as_view(), name='register'),
     path('admin-only/', AdminOnlyView.as_view(), name='admin-only'),

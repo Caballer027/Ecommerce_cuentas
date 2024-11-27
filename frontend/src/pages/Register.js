@@ -5,19 +5,55 @@ import { Link } from 'react-router-dom';
 const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [password2, setPassword2] = useState('');
     const [username, setUsername] = useState('');
+    const [role, setRole] = useState(''); // Estado para el rol
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
+        // Validar que las contraseñas coincidan
+        if (password !== password2) {
+            alert('Las contraseñas no coinciden.');
+            return;
+        }
+
         try {
-            await axios.post('http://localhost:8000/api/register/', { username, email, password });
-            alert('Registro exitoso');
+            await axios.post('http://localhost:8000/api/register/', {
+                username,
+                email,
+                password,
+                password2,
+                role,
+            });
+            alert('Registro exitoso, ahora puedes iniciar sesión.');
             window.location.href = '/';
         } catch (error) {
-            alert('Error en el registro');
+            if (error.response && error.response.data) {
+                const errors = error.response.data;
+                if (errors.username) {
+                    alert(`Error: ${errors.username}`);
+                } else if (errors.email) {
+                    alert(`Error: ${errors.email}`);
+                } else {
+                    alert('Error: Intenta nuevamente.');
+                }
+            } else {
+                alert('Error en el servidor.');
+            }
+        }
+        
+    };
+    const verificarDisponibilidad = async (username) => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/verificar-username/?username=${username}`);
+            return response.data.disponible;
+        } catch (error) {
+            console.error('Error al verificar disponibilidad:', error);
+            return false;
         }
     };
-
+    
     return (
         <div className="register-page d-flex justify-content-center align-items-center vh-100">
             <div className="card p-4 shadow-sm">
@@ -55,6 +91,31 @@ const Register = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
+                    </div>
+                    <div className="form-group mb-3">
+                        <label htmlFor="password2">Confirma tu Contraseña</label>
+                        <input
+                            type="password"
+                            id="password2"
+                            className="form-control"
+                            placeholder="Confirma tu contraseña"
+                            value={password2}
+                            onChange={(e) => setPassword2(e.target.value)}
+                        />
+                    </div>
+                    <div className="form-group mb-3">
+                        <label htmlFor="role">Selecciona tu Rol</label>
+                        <select
+                            id="role"
+                            className="form-control"
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
+                        >
+                            <option value="">Selecciona un rol</option>
+                            <option value="Administrador">Administrador</option>
+                            <option value="Contador">Contador</option>
+                            <option value="Gerente">Gerente</option>
+                        </select>
                     </div>
                     <button type="submit" className="btn btn-success w-100">
                         Registrar
