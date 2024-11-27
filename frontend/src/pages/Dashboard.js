@@ -7,19 +7,23 @@ import axios from 'axios';
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Dashboard = () => {
-    const [barData, setBarData] = useState({});
-    const [pieData, setPieData] = useState({});
+    const [barData, setBarData] = useState({
+        labels: [],
+        datasets: []
+    });
+    const [pieData, setPieData] = useState({
+        labels: [],
+        datasets: []
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Función para obtener datos desde el backend
         const fetchData = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/dashboard-data/');
-                const { flujo_caja, estado_facturas } = response.data;
+                const { flujo_caja = [], estado_facturas = [] } = response.data;
 
-                // Preparar datos para el gráfico de barras
-                const barLabels = flujo_caja.map(item => item.nombre_mes); // Usamos el nombre del mes
+                const barLabels = flujo_caja.map(item => item.nombre_mes);
                 const totalPorCobrar = flujo_caja.map(item => item.total_por_cobrar || 0);
                 const totalPorPagar = flujo_caja.map(item => item.total_por_pagar || 0);
 
@@ -27,23 +31,24 @@ const Dashboard = () => {
                     labels: barLabels,
                     datasets: [
                         {
-                            label: 'Total por Cobrar (S/.)',
+                            label: 'Por Cobrar (S/.)',
                             data: totalPorCobrar,
-                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
+                            backgroundColor: 'rgba(93, 173, 226, 0.6)',
+                            borderColor: 'rgba(93, 173, 226, 1)',
+                            borderWidth: 2,
+                            borderRadius: 5,
                         },
                         {
-                            label: 'Total por Pagar (S/.)',
+                            label: 'Por Pagar (S/.)',
                             data: totalPorPagar,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1,
+                            backgroundColor: 'rgba(72, 201, 176, 0.6)',
+                            borderColor: 'rgba(72, 201, 176, 1)',
+                            borderWidth: 2,
+                            borderRadius: 5,
                         },
                     ],
                 });
 
-                // Preparar datos para el gráfico de pastel
                 const pieLabels = estado_facturas.map(item => item.estado);
                 const pieValues = estado_facturas.map(item => item.cantidad);
 
@@ -52,8 +57,10 @@ const Dashboard = () => {
                     datasets: [
                         {
                             data: pieValues,
-                            backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
-                            hoverBackgroundColor: ['#36A2EB', '#FFCE56', '#FF6384'],
+                            backgroundColor: ['#5DADE2', '#F7DC6F', '#E74C3C'],
+                            hoverBackgroundColor: ['#3498DB', '#F1C40F', '#C0392B'],
+                            borderWidth: 2,
+                            hoverOffset: 10,
                         },
                     ],
                 });
@@ -69,25 +76,41 @@ const Dashboard = () => {
     }, []);
 
     return (
-        <div className="dashboard-page container py-5">
-            <h2 className="text-center mb-4">Dashboard Contable</h2>
+        <div className="container py-5">
+            <h1 className="text-center mb-5" style={{ color: '#34495E', fontWeight: '700' }}>
+                <i className="fas fa-chart-bar me-2"></i>Dashboard de Finanzas
+            </h1>
             {loading ? (
-                <p className="text-center">Cargando datos...</p>
+                <div className="d-flex justify-content-center align-items-center" style={{ height: '300px' }}>
+                    <div className="spinner-grow text-secondary" role="status">
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
             ) : (
-                <div className="row">
-                    <div className="col-md-6 mb-4">
-                        <div className="card shadow-sm">
-                            <div className="card-body">
-                                <h5 className="card-title text-center">Flujo de Caja por Mes</h5>
-                                <Bar data={barData} />
+                <div className="row g-5">
+                    <div className="col-md-6">
+                        <div
+                            className="p-4 shadow rounded"
+                            style={{ backgroundColor: '#FDFEFE', borderLeft: '5px solid #3498DB' }}
+                        >
+                            <h5 className="text-center" style={{ color: '#2E86C1', fontWeight: '600' }}>
+                                Flujo de Caja Mensual
+                            </h5>
+                            <div style={{ height: '300px' }}>
+                                <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
                             </div>
                         </div>
                     </div>
-                    <div className="col-md-6 mb-4">
-                        <div className="card shadow-sm">
-                            <div className="card-body">
-                                <h5 className="card-title text-center">Estado de las Facturas</h5>
-                                <Pie data={pieData} />
+                    <div className="col-md-6">
+                        <div
+                            className="p-4 shadow rounded"
+                            style={{ backgroundColor: '#FDFEFE', borderLeft: '5px solid #1ABC9C' }}
+                        >
+                            <h5 className="text-center" style={{ color: '#16A085', fontWeight: '600' }}>
+                                Distribución de Facturas
+                            </h5>
+                            <div style={{ height: '300px' }}>
+                                <Pie data={pieData} options={{ responsive: true, maintainAspectRatio: false }} />
                             </div>
                         </div>
                     </div>
